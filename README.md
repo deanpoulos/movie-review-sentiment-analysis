@@ -6,7 +6,9 @@ For this assignment you will be writing a Pytorch program that learns to read pr
 
 ## Getting Started
 Your task is to complete the file student.py in such a way that it can be run in conjunction with hw2main.py by typing 
+
 `python3 hw2main.py`
+
 You must NOT modify hw2main.py in any way. You should ONLY modify student.py
 The provided file hw2main.py handles the following:
  - Loading the data from train.json
@@ -37,7 +39,9 @@ Briefly describe how your program works, and explain any design and training dec
 After submissions have closed, your code wil be run on a holdout test set (i.e. a set of reviews and ratings that we do not make available to you, but which we will use to test your model). Marks will be allocated as follows:
  - 12 marks for Algorithms, Style, Comments and Answer to the Question
  - 18 marks based on performance on the (unseen) test set
+
 The performance mark will be a function of the Weighted score, which is:
+
 (1.0 × Correct predictions percentage) + (0.4 × One star away percentage)
 
 ## Groups
@@ -45,10 +49,15 @@ This assignment may be done individually, or in groups of two students. Groups a
 
 ## Submission
 You should submit your trained model and Python code by typing
+
 `give cs9444 hw2 student.py savedModel.pth`
+
 You must submit your trained model savedModel.pth as well as the Python code student.py
+
 You can submit as many times as you like - later submissions by either group member will overwrite previous submissions by either group member. You can check that your submission has been received by using the following command:
+
 `9444 classrun -check`
+
 The submission deadline is Sunday 9 August, 23:59. 15% penalty will be applied to the (maximum) mark for every 24 hours late after the deadline.
 
 Additional information may be found in the FAQ and will be considered as part of the specification for the project. You should check this page regularly.
@@ -56,10 +65,10 @@ Additional information may be found in the FAQ and will be considered as part of
 When you submit, the system will check that your model can be successfully loaded, and evaluate it on data randomly chosen from a third dataset (disjoint from train.json and also disjoint from the holdout test set).
 
 ## Common Questions:
- - Can I train on the full dataset if I find it? No. You should NOT attempt to reconstruct the test set by searching the Internet. We will retrain a random selection of submissions, as well as those achieving high accuracy. If your code attempts to search or load external assets, or we find a mismatch between your submittied code and saved model, you will receive zero marks.
- - My model is only slightly larger than 50MB, can you still accept it? No, the 50MB limit is part of the assignment specification and is quite generous. You should be able to get away with much less.
- - Can we assume you will call net.eval() on our model prior to testing? Yes.
- - Can we assume a max length on the reviews? No. But nothing will be significantly longer than what is present in the training set.
+ - **Can I train on the full dataset if I find it?** No. You should NOT attempt to reconstruct the test set by searching the Internet. We will retrain a random selection of submissions, as well as those achieving high accuracy. If your code attempts to search or load external assets, or we find a mismatch between your submittied code and saved model, you will receive zero marks.
+ - **My model is only slightly larger than 50MB, can you still accept it?** No, the 50MB limit is part of the assignment specification and is quite generous. You should be able to get away with much less.
+ - **Can we assume you will call net.eval() on our model prior to testing?** Yes.
+ - **Can we assume a max length on the reviews?** No. But nothing will be significantly longer than what is present in the training set.
 
 ## General Advice:
  - You have been provided only rudimentary skeleton code that saves your model and prints the loss and accuracy at various inputs. You will almost certainly need to expand on this code so as to have a clearer understanding of what your model is doing.
