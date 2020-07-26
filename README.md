@@ -1,6 +1,4 @@
 # COMP9444-PhiTorch
-
-## Description
 **COMP9444**: Rating System - Predictive Neural Network by *Dean Poulos* and *Leo Carnovale*.
 
 ## Introduction
