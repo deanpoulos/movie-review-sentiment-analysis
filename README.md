@@ -1,6 +1,9 @@
 # COMP9444-PhiTorch
 **COMP9444**: Rating System - Predictive Neural Network by *Dean Poulos* and *Leo Carnovale*.
 
+## Helpful Links
+ - https://stackabuse.com/python-for-nlp-movie-sentiment-analysis-using-deep-learning-in-keras/
+
 ## Introduction
 For this assignment you will be writing a Pytorch program that learns to read product reviews in text format and predict an integer rating from 1 to 5 stars associated with each review. 
 
