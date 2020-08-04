@@ -22,26 +22,37 @@ You may only use GloVe 6B word vectors as found in the torchtext package.
 import torch.nn as tnn
 import torch.optim as toptim
 from torchtext.vocab import GloVe
+import nltk
+from nltk.corpus import stopwords
+from nltk.stem import PorterStemmer
 # import numpy as np
 # import sklearn
 
 ###########################################################################
 ### The following determines the processing of input data (review text) ###
 ###########################################################################
-
 def preprocessing(sample):
     """
     Called after tokenising but before numericalising.
+        `sample`: a list of words (as strings)
     """
-    # Sample is a list of words (as strings)
+    # remove stopwords from sample
+    sw = set(stopwords.words('english'))
+    sample = [s for s in sample if s not in sw]
+
+    # improve vocabulary by stemming, i.e., reduce 'jumping' to 'jump'
+    ps = PorterStemmer()
+    sample = [ps.stem(s) for s in sample]
+
+    #print(" ".join(sample))
 
     return sample
 
 def postprocessing(batch, vocab):
     """
     Called after numericalisation but before vectorisation.
+        `vocab`: torchtext.vocab.Vocab object
     """
-    # vocab is a torchtext.vocab.Vocab object
 
     return batch
 
