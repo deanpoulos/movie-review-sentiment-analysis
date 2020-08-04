@@ -33,6 +33,7 @@ def preprocessing(sample):
     """
     Called after tokenising but before numericalising.
     """
+    # Sample is a list of words (as strings)
 
     return sample
 
@@ -40,6 +41,7 @@ def postprocessing(batch, vocab):
     """
     Called after numericalisation but before vectorisation.
     """
+    # vocab is a torchtext.vocab.Vocab object
 
     return batch
 
@@ -58,6 +60,7 @@ def convertLabel(datasetLabel):
     to convert them to another representation in this function.
     Consider regression vs classification.
     """
+
 
     return datasetLabel
 
@@ -83,12 +86,23 @@ class network(tnn.Module):
     have different numbers of words in them, padding has been added to the
     end of the reviews so we can form a batch of reviews of equal length.
     """
+    n_in = 30 * 50 # NOTE: This is wrong, inputs have varying shapes, but 
+                   # it is always *something* x 50
+                   # Not sure how to account for that.
+    n_out = 5 # 5 possible ratings (1 - 5 inclusive)
 
     def __init__(self):
         super(network, self).__init__()
 
+        self.lin = tnn.Linear(self.n_in, self.n_out)
+        self.lsm = tnn.LogSoftmax(dim=0)
+
     def forward(self, input, length):
-        pass
+        print("input shape:", input.shape)
+        print("lenght shape:", length.shape)
+        data = self.lin(input)
+        data = self.lsm(data)
+        return data
 
 class loss(tnn.Module):
     """
