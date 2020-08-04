@@ -4,6 +4,11 @@
 ## Helpful Links
  - https://stackabuse.com/python-for-nlp-movie-sentiment-analysis-using-deep-learning-in-keras/
  - https://towardsdatascience.com/sentiment-analysis-for-text-with-deep-learning-2f0a0c6472b5
+ - https://www.ijcai.org/Proceedings/15/Papers/193.pdf
+ - http://bcmi.sjtu.edu.cn/~paclic29/proceedings/PACLIC29-1059.12.pdf
+
+## Todo
+ - [ ] Research Cross-Entropy, USE A CUSTOM LOSS FUNCTION
 
 ## Introduction
 For this assignment you will be writing a Pytorch program that learns to read product reviews in text format and predict an integer rating from 1 to 5 stars associated with each review. 
