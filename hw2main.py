@@ -52,37 +52,40 @@ def main():
     optimiser = student.optimiser
 
     # Train.
-    for epoch in range(student.epochs):
-        runningLoss = 0
+    try:
+        for epoch in range(student.epochs):
+            runningLoss = 0
 
-        for i, batch in enumerate(trainLoader):
-            # Get a batch and potentially send it to GPU memory.
-            inputs = textField.vocab.vectors[batch.reviewText[0]].to(device)
-            length = batch.reviewText[1].to(device)
-            labels = batch.rating.type(torch.FloatTensor).to(device)
+            for i, batch in enumerate(trainLoader):
+                # Get a batch and potentially send it to GPU memory.
+                inputs = textField.vocab.vectors[batch.reviewText[0]].to(device)
+                length = batch.reviewText[1].to(device)
+                labels = batch.rating.type(torch.FloatTensor).to(device)
 
-            # PyTorch calculates gradients by accumulating contributions
-            # to them (useful for RNNs).
-            # Hence we must manually set them to zero before calculating them.
-            optimiser.zero_grad()
+                # PyTorch calculates gradients by accumulating contributions
+                # to them (useful for RNNs).
+                # Hence we must manually set them to zero before calculating them.
+                optimiser.zero_grad()
 
-            # Forward pass through the network.
-            output = net(inputs, length)
-            loss = criterion(output, student.convertLabel(labels))
+                # Forward pass through the network.
+                output = net(inputs, length)
+                loss = criterion(output, student.convertLabel(labels))
 
-            # Calculate gradients.
-            loss.backward()
+                # Calculate gradients.
+                loss.backward()
 
-            # Minimise the loss according to the gradient.
-            optimiser.step()
+                # Minimise the loss according to the gradient.
+                optimiser.step()
 
-            runningLoss += loss.item()
+                runningLoss += loss.item()
 
-            if i % 32 == 31:
-                print("Epoch: %2d, Batch: %4d, Loss: %.3f"
-                      % (epoch + 1, i + 1, runningLoss / 32))
-                runningLoss = 0
-
+                if i % 32 == 31:
+                    print("Epoch: %2d, Batch: %4d, Loss: %.3f"
+                        % (epoch + 1, i + 1, runningLoss / 32))
+                    runningLoss = 0
+    except KeyboardInterrupt:
+        print("Stopping training.")
+        pass
     # Save model.
     torch.save(net.state_dict(), 'savedModel.pth')
     print("\n"
