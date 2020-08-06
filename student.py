@@ -20,12 +20,13 @@ You may only use GloVe 6B word vectors as found in the torchtext package.
 
 import torch.nn as tnn
 import torch.optim as toptim
+import torch
 from torch import round as rnd
 from torchtext.vocab import GloVe
 import nltk
 from nltk.corpus import stopwords
 from nltk.stem import PorterStemmer
-# import numpy as np
+import numpy as np
 # import sklearn
 
 ###########################################################################
@@ -75,8 +76,14 @@ def convertLabel(datasetLabel):
     Consider regression vs classification.
     """
 
+    # zeros = np.zeros((*datasetLabel.shape, 5), dtype=np.float)
 
-    return datasetLabel
+    # device = datasetLabel.device
+    zeros = torch.zeros((*datasetLabel.shape, 5), dtype=torch.float)
+    ints = datasetLabel.to(int) - 1
+    zeros[np.arange(len(ints)), ints] = 1.0
+    # zeros.index_put(datasetLabel, 1.0)
+    return zeros.to(datasetLabel.device)
 
 def convertNetOutput(netOutput):
     """
@@ -87,7 +94,9 @@ def convertNetOutput(netOutput):
     values other than the five mentioned, convert the output here.
     """
 
-    return rnd(netOutput)
+    # return rnd(netOutput)
+
+    return netOutput.argmax(axis=1).to(torch.float) + 1.0
 
 ###########################################################################
 ################### The following determines the model ####################
@@ -103,18 +112,28 @@ class network(tnn.Module):
     def __init__(self):
         super(network, self).__init__()
         self.lstm = tnn.LSTM(50, 256, 2, batch_first=True)
+        # self.fc0 = tnn.Linear(256*120, 256)
         self.fc1 = tnn.Linear(256, 64)
-        self.fc2 = tnn.Linear(64, 16)
-        self.fc3 = tnn.Linear(16, 1)
+        self.fc2 = tnn.Linear(64*120, 50)
+        self.fc3 = tnn.Linear(50, 5)
+        self.lsm = tnn.LogSoftmax(dim=1)
 
     def forward(self, iput, length):
-        data, states = self.lstm(iput)
-        data = data.contiguous().view(-1, 256)
+        n_b = len(iput)
+        padded_input = tnn.functional.pad(
+            iput, [0, 0, 0, 120 - iput.shape[1]]
+        ) # has shape [#batches, 120, 50]
+        data, states = self.lstm(padded_input)
+        # data = data.contiguous().view(data.shape[0], -)
+        data = data.contiguous().view(n_b, 120, -1)
+        # data = self.fc0(data)
         data = self.fc1(data)
+        data = data.view(n_b, -1)
         data = self.fc2(data)
         data = self.fc3(data)
-        data = data.view(len(length), -1)
-        return data[:,-1]
+        # data = data.view(len(length), 5)
+        data = self.lsm(data)
+        return data
 
 class loss(tnn.Module):
     """
@@ -126,7 +145,10 @@ class loss(tnn.Module):
         super(loss, self).__init__()
 
     def forward(self, output, target):
-        pass
+        # targets = convertLabel(target)
+        sqr_err = (output - target)**2
+        mse = sqr_err.mean()
+        return mse
 
 net = network()
 """
@@ -134,6 +156,7 @@ net = network()
     the torch package, or create your own with the loss class above.
 """
 lossFunc = tnn.MSELoss()
+# lossFunc = loss()
 
 ###########################################################################
 ################ The following determines training options ################
@@ -142,4 +165,5 @@ lossFunc = tnn.MSELoss()
 trainValSplit = 0.8
 batchSize = 32
 epochs = 10
-optimiser = toptim.SGD(net.parameters(), lr=0.02)
+# optimiser = toptim.SGD(net.parameters(), lr=0.02)
+optimiser = toptim.Adam(net.parameters(), lr=0.005)
