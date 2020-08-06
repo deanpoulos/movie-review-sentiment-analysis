@@ -21,11 +21,13 @@ You may only use GloVe 6B word vectors as found in the torchtext package.
 import torch.nn as tnn
 import torch.optim as toptim
 from torch import round as rnd
+from torch import transpose
+from torch import Tensor
 from torchtext.vocab import GloVe
 import nltk
 from nltk.corpus import stopwords
 from nltk.stem import PorterStemmer
-# import numpy as np
+import numpy as np
 # import sklearn
 
 ###########################################################################
@@ -60,7 +62,7 @@ def postprocessing(batch, vocab):
     return batch
 
 stopWords = set(stopwords.words('english'))
-wordVectors = GloVe(name='6B', dim=50)
+wordVectors = GloVe(name='6B', dim=300)
 
 ###########################################################################
 ##### The following determines the processing of label data (ratings) #####
@@ -75,8 +77,14 @@ def convertLabel(datasetLabel):
     Consider regression vs classification.
     """
 
+    # Use a one-hot encoding
+    newLabels = []
+    for elem in datasetLabel:
+        newLabel = [0,0,0,0,0]
+        newLabel[int(elem - 1)] = 1
+        newLabels.append(newLabel)
 
-    return datasetLabel
+    return Tensor(newLabels).to(device)
 
 def convertNetOutput(netOutput):
     """
@@ -87,7 +95,14 @@ def convertNetOutput(netOutput):
     values other than the five mentioned, convert the output here.
     """
 
-    return rnd(netOutput)
+    # Take max-probability and return it
+    newOutput = []
+    for elem in netOutput:
+        newOutput.append((elem == max(elem)).nonzero() + 1)
+
+    newOutput = Tensor(newOutput).to(device)
+
+    return newOutput
 
 ###########################################################################
 ################### The following determines the model ####################
@@ -102,19 +117,36 @@ class network(tnn.Module):
     """
     def __init__(self):
         super(network, self).__init__()
-        self.lstm = tnn.LSTM(50, 256, 2, batch_first=True)
-        self.fc1 = tnn.Linear(256, 64)
-        self.fc2 = tnn.Linear(64, 16)
-        self.fc3 = tnn.Linear(16, 1)
+        self.lstm = tnn.LSTM(300, 625, 2, batch_first=True)
+        self.fc1 = tnn.Linear(625, 125)
+        self.r1 = tnn.ReLU()
+        self.fc2 = tnn.Linear(125, 25)
+        self.r2 = tnn.ReLU()
+        self.fc3 = tnn.Linear(25, 5)
+        self.sm = tnn.Softmax()
 
-    def forward(self, iput, length):
-        data, states = self.lstm(iput)
-        data = data.contiguous().view(-1, 256)
+    def forward(self, input, length):
+        # Apply LSTM and make timesteps sequential
+        data, states = self.lstm(input)
+        data = data.contiguous().view(-1, 625)
+
+        # Propogate through dense layer and ReLU
         data = self.fc1(data)
+        data = self.r1(data)
+
+        # Propogate through dense layer and ReLU
         data = self.fc2(data)
+        data = self.r2(data)
+
+        # Propogate through dense layer and ReLU
         data = self.fc3(data)
+        data = self.sm(data)
+
+        # Ignore all timesteps except the last
         data = data.view(len(length), -1)
-        return data[:,-1]
+        data = data[:,-5:]
+
+        return data
 
 class loss(tnn.Module):
     """
@@ -133,7 +165,7 @@ net = network()
     Loss function for the model. You may use loss functions found in
     the torch package, or create your own with the loss class above.
 """
-lossFunc = tnn.MSELoss()
+lossFunc = tnn.BCELoss()
 
 ###########################################################################
 ################ The following determines training options ################
@@ -142,4 +174,4 @@ lossFunc = tnn.MSELoss()
 trainValSplit = 0.8
 batchSize = 32
 epochs = 10
-optimiser = toptim.SGD(net.parameters(), lr=0.02)
+optimiser = toptim.Adam(net.parameters(), lr=0.001)
