@@ -40,7 +40,6 @@ def preprocessing(sample):
     # remove stopwords from sample
     """
 
-    """
     sw = set(stopwords.words('english'))
     sample = [s for s in sample if s not in sw]
 
@@ -50,7 +49,6 @@ def preprocessing(sample):
 
     #print(" ".join(sample))
 
-    """
     return sample
 
 def postprocessing(batch, vocab):
@@ -61,7 +59,7 @@ def postprocessing(batch, vocab):
 
     return batch
 
-stopWords = set(stopwords.words('english'))
+stopWords = {}#set(stopwords.words('english'))
 wordVectors = GloVe(name='6B', dim=300)
 
 ###########################################################################
@@ -107,6 +105,42 @@ def convertNetOutput(netOutput):
 ###########################################################################
 ################### The following determines the model ####################
 ###########################################################################
+
+class lstm_network(tnn.Module):
+    """
+    Class for creating the neural network.  The input to your network
+    will be a batch of reviews (in word vector form).  As reviews will
+    have different numbers of words in them, padding has been added to the
+    end of the reviews so we can form a batch of reviews of equal length.
+    """
+    def __init__(self):
+        super(network, self).__init__()
+        # params
+        self.vocab = 50
+        self.layers = 2
+        self.hidden = 256
+        self.dropout = 0.1
+        self.output = 5
+        # layers
+        self.lstm = tnn.LSTM(self.vocab, self.hidden, self.layers, 
+                             batch_first=True, bidirectional=True, dropout=self.dropout)
+        self.dropout = tnn.Dropout(self.dropout)
+        self.fc = tnn.Linear(self.hidden, self.output)
+        self.sigmoid = tnn.Sigmoid()
+
+    def forward(self, input, length):
+        batch_size = len(length)
+                                                 # Input: [batch_size, seq_length, n_vocab ]
+        lstm_out, h = self.lstm(input)                  # [batch_size, seq_length, n_hidden]
+        lstm_out = self.dropout(lstm_out)       
+        lstm_out = lstm_out.contiguous().view(-1, self.hidden)
+                                                        # [batch_size*seq_length, n_hidden]
+        fc_out = self.fc(lstm_out)                      # [batch_size*seq_length, n_output]
+        sigmoid_out = self.sigmoid(fc_out)              # [batch_size*seq_length, n_output] 
+        sigmoid_out = sigmoid_out.view(batch_size, -1)  # [batch_size, seq_length*n_output] 
+        sigmoid_last = sigmoid_out[:,-5:]               # [batch_size, 5]
+
+        return sigmoid_last
 
 class network(tnn.Module):
     """
@@ -174,4 +208,4 @@ lossFunc = tnn.BCELoss()
 trainValSplit = 0.8
 batchSize = 32
 epochs = 10
-optimiser = toptim.Adam(net.parameters(), lr=0.001)
+optimiser = toptim.Adam(net.parameters(), lr=0.0001)
