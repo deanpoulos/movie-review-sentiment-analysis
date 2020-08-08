@@ -61,7 +61,7 @@ def postprocessing(batch, vocab):
     return batch
 
 stopWords = set(stopwords.words('english'))
-wordVectors = GloVe(name='6B', dim=50)
+wordVectors = GloVe(name='6B', dim=300)
 
 ###########################################################################
 ##### The following determines the processing of label data (ratings) #####
@@ -94,8 +94,6 @@ def convertNetOutput(netOutput):
     values other than the five mentioned, convert the output here.
     """
 
-    # return rnd(netOutput)
-
     return netOutput.argmax(axis=1).to(torch.float) + 1.0
 
 ###########################################################################
@@ -109,32 +107,47 @@ class network(tnn.Module):
     have different numbers of words in them, padding has been added to the
     end of the reviews so we can form a batch of reviews of equal length.
     """
+    n_in = wordVectors.dim
+    n_hidden = 300
+    n_layers_lstm = 2
+    drop = 0.1
+    
     def __init__(self):
         super(network, self).__init__()
-        self.lstm = tnn.LSTM(50, 256, 2, batch_first=True)
+        self.lstm = tnn.LSTM(
+            self.n_in, self.n_hidden, self.n_layers_lstm, 
+            batch_first=True, bidirectional=False, dropout=self.drop
+        )
         # self.fc0 = tnn.Linear(256*120, 256)
-        self.fc1 = tnn.Linear(256, 64)
-        # self.act = tnn.Tanh()
-        self.act = tnn.ReLU()
-        self.fc2 = tnn.Linear(64*120, 50)
+        self.fc1 = tnn.Linear(
+            self.n_hidden * (2 if self.lstm.bidirectional else 1), 300
+        )
+        self.fc2 = tnn.Linear(300, 50)
         self.fc3 = tnn.Linear(50, 5)
+        self.act = tnn.Tanh()
         self.sm = tnn.Softmax(dim=1)
+        self.dropout = tnn.Dropout(self.drop)
 
     def forward(self, iput, length):
         n_b = len(iput)
-        padded_input = tnn.functional.pad(
-            iput, [0, 0, 0, 120 - iput.shape[1]]
-        ) # has shape [#batches, 120, 50]
-        data, states = self.lstm(padded_input)
+        # padded_input = tnn.functional.pad(
+        #     iput, [0, 0, 0, 120 - iput.shape[1]]
+        # ) # has shape [#batches, 120, 50]
+        data, states = self.lstm(iput)
+        # data = self.dropout(data)
+        data = data[:, -1, :]
         # data = data.contiguous().view(data.shape[0], -)
-        data = data.contiguous().view(n_b, 120, -1)
+        # data = data.contiguous().view(n_b, 120, -1)
         # data = self.act(data)
+        # data = data.view(n_b, -1)
         # data = self.fc0(data)
         data = self.fc1(data)
         data = self.act(data)
-        data = data.view(n_b, -1)
+        
+        # data = data.view(n_b, -1)
         data = self.fc2(data)
         data = self.act(data)
+
         data = self.fc3(data)
         # data = data.view(len(length), 5)
         data = self.sm(data)
@@ -146,13 +159,18 @@ class loss(tnn.Module):
     You may remove/comment out this class if you are not using it.
     """
 
+
     def __init__(self):
         super(loss, self).__init__()
 
     def forward(self, output, target):
+        dist_weight = 2
+        err_weight = 1
         # targets = convertLabel(target)
         sqr_err = (output - target)**2
-        mse = sqr_err.mean()
+        sqr_dist = (output.argmax(dim=1) - target.argmax(dim=1))**2
+        sqr_dist = sqr_dist.to(torch.float)
+        mse = err_weight*sqr_err.mean() + dist_weight*sqr_dist.mean()
         return mse
 
 net = network()
@@ -160,8 +178,8 @@ net = network()
     Loss function for the model. You may use loss functions found in
     the torch package, or create your own with the loss class above.
 """
-lossFunc = tnn.BCELoss()
-# lossFunc = loss()
+# lossFunc = tnn.BCELoss()
+lossFunc = loss()
 
 ###########################################################################
 ################ The following determines training options ################
@@ -171,4 +189,4 @@ trainValSplit = 0.8
 batchSize = 32
 epochs = 10
 # optimiser = toptim.SGD(net.parameters(), lr=0.02)
-optimiser = toptim.Adam(net.parameters(), lr=0.005)
+optimiser = toptim.Adam(net.parameters(), lr=0.0001)
