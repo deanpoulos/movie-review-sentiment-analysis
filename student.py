@@ -114,9 +114,11 @@ class network(tnn.Module):
         self.lstm = tnn.LSTM(50, 256, 2, batch_first=True)
         # self.fc0 = tnn.Linear(256*120, 256)
         self.fc1 = tnn.Linear(256, 64)
+        # self.act = tnn.Tanh()
+        self.act = tnn.ReLU()
         self.fc2 = tnn.Linear(64*120, 50)
         self.fc3 = tnn.Linear(50, 5)
-        self.lsm = tnn.LogSoftmax(dim=1)
+        self.sm = tnn.Softmax(dim=1)
 
     def forward(self, iput, length):
         n_b = len(iput)
@@ -126,13 +128,16 @@ class network(tnn.Module):
         data, states = self.lstm(padded_input)
         # data = data.contiguous().view(data.shape[0], -)
         data = data.contiguous().view(n_b, 120, -1)
+        # data = self.act(data)
         # data = self.fc0(data)
         data = self.fc1(data)
+        data = self.act(data)
         data = data.view(n_b, -1)
         data = self.fc2(data)
+        data = self.act(data)
         data = self.fc3(data)
         # data = data.view(len(length), 5)
-        data = self.lsm(data)
+        data = self.sm(data)
         return data
 
 class loss(tnn.Module):
@@ -155,7 +160,7 @@ net = network()
     Loss function for the model. You may use loss functions found in
     the torch package, or create your own with the loss class above.
 """
-lossFunc = tnn.MSELoss()
+lossFunc = tnn.BCELoss()
 # lossFunc = loss()
 
 ###########################################################################
