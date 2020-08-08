@@ -112,14 +112,26 @@ def main():
         accuracy = [x / len(validate) for x in closeness]
         score = 100 * (accuracy[0] + 0.4 * accuracy[1])
 
-        print("\n"
+        scores = ("\n"
               "Correct predictions: {:.2%}\n"
               "One star away: {:.2%}\n"
               "Two stars away: {:.2%}\n"
               "Three stars away: {:.2%}\n"
               "Four stars away: {:.2%}\n"
               "\n"
-              "Weighted score: {:.2f}".format(*accuracy, score))
+              "Weighted score: {:.2f}").format(*accuracy, score)
+        print(scores)
+              
+    # Add to log
+    with open("log.txt", "a") as f:
+        f.write("Model:\n")
+        f.write(str(net))
+        f.write("\n\nEpochs: {}\n".format(student.epochs))
+        f.write("\nOptimiser: {}\n".format(student.optimiser))
+        f.write("\nResults:\n")
+        f.write(scores)
+        f.write("\n===========\n")
+
 
 if __name__ == '__main__':
     main()
