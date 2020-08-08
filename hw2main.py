@@ -123,14 +123,16 @@ def main():
         print(scores)
               
     # Add to log
-    with open("log.txt", "a") as f:
-        f.write("Model:\n")
-        f.write(str(net))
-        f.write("\n\nEpochs: {}\n".format(student.epochs))
-        f.write("\nOptimiser: {}\n".format(student.optimiser))
-        f.write("\nResults:\n")
-        f.write(scores)
-        f.write("\n===========\n")
+    if '--nolog' not in sys.argv:
+        with open("log.txt", "a") as f:
+            f.write("Model:\n")
+            f.write(str(net))
+            f.write("\n\nEpochs: {}\n".format(student.epochs))
+            f.write("Word vec dim: {}\n".format(student.wordVectors.dim))
+            f.write("\nOptimiser: {}\n".format(student.optimiser))
+            f.write("\nResults:\n")
+            f.write(scores)
+            f.write("\n===========\n")
 
 
 if __name__ == '__main__':
