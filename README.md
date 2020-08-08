@@ -5,6 +5,7 @@
  - http://ir.hit.edu.cn/~dytang/paper/ijcai2015/ijcai15.pdf
  - https://www.kaggle.com/xhlulu/zomato-predicting-review-scores-with-lstm
  - https://web.stanford.edu/class/archive/cs/cs224n/cs224n.1174/reports/2760995.pdf
+ - https://github.com/lukysummer/Movie-Review-Sentiment-Analysis-LSTM-Pytorch/blob/master/sentiment_analysis_LSTM.py
 
 ## Todo
  - [x] Implement BCELoss function.
