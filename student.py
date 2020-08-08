@@ -21,8 +21,7 @@ You may only use GloVe 6B word vectors as found in the torchtext package.
 import torch.nn as tnn
 import torch.optim as toptim
 from torch import round as rnd
-from torch import transpose
-from torch import Tensor
+from torch import transpose, Tensor, device, argmax, cuda, sqrt
 from torchtext.vocab import GloVe
 import nltk
 from nltk.corpus import stopwords
@@ -38,7 +37,6 @@ def preprocessing(sample):
     Called after tokenising but before numericalising.
         `sample`: a list of words (as strings)
     # remove stopwords from sample
-    """
 
     sw = set(stopwords.words('english'))
     sample = [s for s in sample if s not in sw]
@@ -49,6 +47,7 @@ def preprocessing(sample):
 
     #print(" ".join(sample))
 
+    """
     return sample
 
 def postprocessing(batch, vocab):
@@ -59,7 +58,7 @@ def postprocessing(batch, vocab):
 
     return batch
 
-stopWords = {}#set(stopwords.words('english'))
+stopWords = set(stopwords.words('english'))
 wordVectors = GloVe(name='6B', dim=300)
 
 ###########################################################################
@@ -192,14 +191,30 @@ class loss(tnn.Module):
         super(loss, self).__init__()
 
     def forward(self, output, target):
-        pass
+        targetStars = argmax(target) + 1
+        BCELoss = tnn.functional.binary_cross_entropy(output, target).to(device)
+#        MSELoss = []
+#        for i in range(len(target)):
+#            ratingLoss = 0
+#            for j in range(5):
+#                x = target[i][j]
+#                y = output[i][j]
+#                k = argmax(target[i]+1).data
+#                ratingLoss += sqrt((x-y)**2)  * abs(j - k)
+#            MSELoss.append(ratingLoss)
+#
+#        MSELoss = Tensor(MSELoss).to(device)
+
+        return BCELoss #+ MSELoss
 
 net = network()
 """
     Loss function for the model. You may use loss functions found in
     the torch package, or create your own with the loss class above.
 """
-lossFunc = tnn.BCELoss()
+device = device('cuda:0' if cuda.is_available() else 'cpu')
+#lossFunc = tnn.BCELoss(Tensor([1,0.65,0.4,0.65,1]).to(device))
+lossFunc = loss()
 
 ###########################################################################
 ################ The following determines training options ################
@@ -208,4 +223,4 @@ lossFunc = tnn.BCELoss()
 trainValSplit = 0.8
 batchSize = 32
 epochs = 10
-optimiser = toptim.Adam(net.parameters(), lr=0.0001)
+optimiser = toptim.Adam(net.parameters(), lr=0.001)
