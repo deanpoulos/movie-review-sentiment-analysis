@@ -60,13 +60,37 @@ def postprocessing(batch, vocab):
     return batch
 
 def read_stopwords():
+    """ Attempts to read stop words from `my_stopwords.txt`, 
+    if this fails a hard-coded set of words will be loaded.
+
+    Returns the stopwords as a list.
+    """
     words = []
     try:
         with open("my_stopwords.txt", "r") as f:
             for line in f:
                 words.extend(line.split())
     except:
-        words = ['i', 'me', 'my', 'myself', 'we', 'our', 'ours', 'ourselves', 'you', "you're", "you've", "you'll", "you'd", 'your', 'yours', 'yourself', 'yourselves', 'he', 'him', 'his', 'himself', 'she', "she's", 'her', 'hers', 'herself', 'it', "it's", 'its', 'itself', 'they', 'them', 'their', 'theirs', 'themselves', 'what', 'which', 'who', 'whom', 'this', 'that', "that'll", 'these', 'those', 'am', 'is', 'are', 'was', 'were', 'be', 'been', 'being', 'have', 'has', 'had', 'having', 'do', 'did', 'doing', 'a', 'an', 'the', 'and', 'but', 'if', 'or', 'because', 'as', 'until', 'while', 'of', 'at', 'by', 'for', 'with', 'about', 'between', 'into', 'through', 'during', 'before', 'after', 'above', 'below', 'to', 'from', 'in', 'out', 'on', 'off', 'over', 'under', 'then', 'once', 'here', 'there', 'when', 'where', 'why', 'how', 'all', 'any', 'both', 'each', 'few', 'more', 'most', 'other', 'some', 'such', 'nor', 'only', 'own', 'same', 'so', 'than', 'too', 'very', 's', 't', 'can', 'will', 'just', 'don', "don't", 'should', "should've", 'now', 'd', 'll', 'm', 'o', 're', 've', 'y', 'ain', 'aren', "aren't", 'hadn', "hadn't", 'hasn', "hasn't", 'haven', "haven't", 'ma', 'mightn', "mightn't", 'needn', "needn't", 'shan', "shan't", 'shouldn', "shouldn't", 'wasn', 'weren', "weren't", 'won']
+        words = ['i', 'me', 'my', 'myself', 'we', 'our', 'ours', 'ourselves', 
+            'you', "you're", "you've", "you'll", "you'd", 'your', 'yours', 
+            'yourself', 'yourselves', 'he', 'him', 'his', 'himself', 'she', 
+            "she's", 'her', 'hers', 'herself', 'it', "it's", 'its', 'itself', 
+            'they', 'them', 'their', 'theirs', 'themselves', 'what', 'which', 
+            'who', 'whom', 'this', 'that', "that'll", 'these', 'those', 'am', 
+            'is', 'are', 'was', 'were', 'be', 'been', 'being', 'have', 'has', 
+            'had', 'having', 'do', 'did', 'doing', 'a', 'an', 'the', 'and', 
+            'but', 'if', 'or', 'because', 'as', 'until', 'while', 'of', 'at', 
+            'by', 'for', 'with', 'about', 'between', 'into', 'through', 
+            'during', 'before', 'after', 'above', 'below', 'to', 'from', 'in', 
+            'out', 'on', 'off', 'over', 'under', 'then', 'once', 'here', 
+            'there', 'when', 'where', 'why', 'how', 'all', 'any', 'both', 
+            'each', 'few', 'more', 'most', 'other', 'some', 'such', 'nor', 
+            'only', 'own', 'same', 'so', 'than', 'too', 'very', 's', 't', 
+            'can', 'will', 'just', 'don', "don't", 'should', "should've", 
+            'now', 'd', 'll', 'm', 'o', 're', 've', 'y', 'ain', 'aren', 
+            "aren't", 'hadn', "hadn't", 'hasn', "hasn't", 'haven', "haven't", 
+            'ma', 'mightn', "mightn't", 'needn', "needn't", 'shan', "shan't", 
+            'shouldn', "shouldn't", 'wasn', 'weren', "weren't", 'won']
 
     return words
 
@@ -101,8 +125,7 @@ def convertNetOutput(netOutput):
     If your network outputs a different representation or any float
     values other than the five mentioned, convert the output here.
     """
-
-    # return most probable number of stars.
+    # Find where the highest element is in each row
     return netOutput.argmax(axis=1).to(torch.float) + 1.0
 
 ###########################################################################
@@ -118,7 +141,10 @@ class network(tnn.Module):
     """
     def __init__(self):
         super(network, self).__init__()
+        # Use an LSTM to scan over the temporal input
         self.lstm = tnn.LSTM(300, 625, 2, batch_first=True)
+        # Pass the output of the LSTM through
+        # 3 fully layers (2 hidden + output layer)
         self.fc1 = tnn.Linear(625, 125)
         self.fc2 = tnn.Linear(125, 25)
         self.fc3 = tnn.Linear(25, 5)
@@ -147,17 +173,35 @@ class network(tnn.Module):
         return data
 
 class BCEPlus(tnn.BCELoss):
+    """
+    Combines BCE loss with a MSE loss weighed by the squared distance
+    of each predicted probability from the target star. 
+    ie, equivalent to:
+        BCEPlus = BCELoss + ( [[  2,   1,   2,   3,   4], ...]**2
+                            * [[0.2, 0.8, 0.5, 0.1, 0.2], ...] )
+
+    This attempts to allocate higher loss to predictions further from 
+    the correct star, aswell as use binary cross-entropy since this
+    is also a classification problem.
+    """
     def __init__(self):
         super(BCEPlus, self).__init__()
 
     def forward(self, output, target):
+        # Calculate the normal BCE loss
         BCEloss = super(BCEPlus, self).forward(output, target)
+
+        # Find the distance of stars from the target star,
+        # ie, dist_from_target will be something like:
+        #     [[3, 2, 1, 2, 3], [4, 3, 2, 1, 2], ...]**2
+        # Where the 1 is at the position of the target prediction.
         target_idx = target.argmax(dim=1, keepdims=True)
         arange = torch.arange(5).repeat([len(target), 1]).to(output.device)
         dist_from_target = target_idx - arange
         dist_from_target = (dist_from_target.abs() + 1)**2
         dist_from_target = dist_from_target.to(torch.float)
         sqr_err = (output - target)**2
+        # Weigh what will become the mse loss by the distances
         product = (dist_from_target * sqr_err)
         loss = product.mean() + BCEloss
         return loss
