@@ -59,7 +59,15 @@ def postprocessing(batch, vocab):
 
     return batch
 
-stopWords = set(stopwords.words('english'))
+def read_stopwords():
+    words = []
+    with open("my_stopwords.txt", "r") as f:
+        for line in f:
+            words.extend(line.split())
+
+    return words
+
+stopWords = set(read_stopwords())
 wordVectors = GloVe(name='6B', dim=300)
 
 ###########################################################################
@@ -109,24 +117,21 @@ class network(tnn.Module):
         super(network, self).__init__()
         self.lstm = tnn.LSTM(300, 625, 2, batch_first=True)
         self.fc1 = tnn.Linear(625, 125)
-        self.r1 = tnn.ReLU()
         self.fc2 = tnn.Linear(125, 25)
-        self.r2 = tnn.ReLU()
         self.fc3 = tnn.Linear(25, 5)
-        self.sm = tnn.Softmax()
+        self.relu = tnn.ReLU()
+        self.sm = tnn.Softmax(dim=1)
 
     def forward(self, input, length):
         # Apply LSTM and make timesteps sequential
         data, states = self.lstm(input)
         data = data.contiguous().view(-1, 625)
 
-        # Propogate through dense layer and ReLU
+        # Propogate through dense layers and ReLU
         data = self.fc1(data)
-        data = self.r1(data)
-
-        # Propogate through dense layer and ReLU
+        data = self.relu(data)
         data = self.fc2(data)
-        data = self.r2(data)
+        data = self.relu(data)
 
         # Propogate through dense layer and Softmax
         data = self.fc3(data)
@@ -138,31 +143,25 @@ class network(tnn.Module):
 
         return data
 
-class loss(tnn.Module):
-    """
-    Class for creating a custom loss function, if desired.
-    You may remove/comment out this class if you are not using it.
-    """
-
+class BCEPlus(tnn.BCELoss):
     def __init__(self):
-        super(loss, self).__init__()
+        super(BCEPlus, self).__init__()
 
     def forward(self, output, target):
-#        return mse
-#        targetStars = argmax(target) + 1
-#        MSELoss = []
-#        for i in range(len(target)):
-#            ratingLoss = 0
-#            for j in range(5):
-#                x = target[i][j]
-#                y = output[i][j]
-#                k = argmax(target[i]+1).data
-#                ratingLoss += sqrt((x-y)**2)  * abs(j - k)
-#            MSELoss.append(ratingLoss)
-#
-#        MSELoss = Tensor(MSELoss).to(device)
+        BCEloss = super(BCEPlus, self).forward(output, target)
+        target_idx = target.argmax(dim=1, keepdims=True)
+        arange = torch.arange(5).repeat([len(target), 1]).to(output.device)
+        dist_from_target = target_idx - arange
+        dist_from_target = (dist_from_target.abs() + 1)**2
+        dist_from_target = dist_from_target.to(torch.float)
+        sqr_err = (output - target)**2
+        product = (dist_from_target * sqr_err)
+        loss = product.mean() + BCEloss
+        return loss
 
-        return BCELoss #+ MSELoss
+    def __str__(self):
+        return super(BCEPlus, self).__str__() + \
+            " [Uses dist**2 * sqr_err + BCE loss]"
 
 net = network()
 """
@@ -170,9 +169,7 @@ net = network()
     the torch package, or create your own with the loss class above.
 """
 device = device('cuda:0' if cuda.is_available() else 'cpu')
-lossFunc = tnn.BCELoss(Tensor([1,0.75,0.5,0.75,1]).to(device))
-#lossFunc = tnn.BCELoss()
-#lossFunc = loss()
+lossFunc = BCEPlus()
 
 ###########################################################################
 ################ The following determines training options ################
@@ -180,5 +177,5 @@ lossFunc = tnn.BCELoss(Tensor([1,0.75,0.5,0.75,1]).to(device))
 
 trainValSplit = 0.8
 batchSize = 32
-epochs = 10
-optimiser = toptim.Adam(net.parameters(), lr=0.001)
+epochs = 20
+optimiser = toptim.Adam(net.parameters(), lr=0.0001)
