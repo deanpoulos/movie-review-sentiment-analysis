@@ -70,3 +70,408 @@ Four stars away: 3.69%
 
 Weighted score: 54.06
 ===========
+Model:
+network(
+  (lstm): LSTM(300, 300, num_layers=2, batch_first=True, dropout=0.1)
+  (fc1): Linear(in_features=300, out_features=300, bias=True)
+  (fc2): Linear(in_features=300, out_features=50, bias=True)
+  (fc3): Linear(in_features=50, out_features=5, bias=True)
+  (act): Tanh()
+  (sm): Softmax(dim=1)
+  (dropout): Dropout(p=0.1, inplace=False)
+)
+
+Epochs: 10
+Word vec dim: 300
+
+Optimiser: SGD (
+Parameter Group 0
+    dampening: 0
+    lr: 0.01
+    momentum: 0
+    nesterov: False
+    weight_decay: 0
+)
+
+Results:
+
+Correct predictions: 20.15%
+One star away: 40.10%
+Two stars away: 19.94%
+Three stars away: 19.81%
+Four stars away: 0.00%
+
+Weighted score: 36.19
+===========
+Model:
+network(
+  (lstm): LSTM(300, 300, num_layers=2, batch_first=True, dropout=0.1)
+  (fc1): Linear(in_features=300, out_features=300, bias=True)
+  (fc2): Linear(in_features=300, out_features=50, bias=True)
+  (fc3): Linear(in_features=50, out_features=5, bias=True)
+  (act): Tanh()
+  (sm): Softmax(dim=1)
+  (dropout): Dropout(p=0.1, inplace=False)
+)
+
+Epochs: 10
+Word vec dim: 300
+
+Optimiser: Adam (
+Parameter Group 0
+    amsgrad: False
+    betas: (0.9, 0.999)
+    eps: 1e-08
+    lr: 0.0001
+    weight_decay: 0
+)
+
+Results:
+
+Correct predictions: 20.00%
+One star away: 40.00%
+Two stars away: 40.00%
+Three stars away: 0.00%
+Four stars away: 0.00%
+
+Weighted score: 36.00
+===========
+Model:
+network(
+  (lstm): LSTM(300, 300, num_layers=2, batch_first=True, dropout=0.1)
+  (fc1): Linear(in_features=300, out_features=300, bias=True)
+  (fc2): Linear(in_features=300, out_features=50, bias=True)
+  (fc3): Linear(in_features=50, out_features=5, bias=True)
+  (act): Tanh()
+  (sm): Softmax(dim=1)
+  (dropout): Dropout(p=0.1, inplace=False)
+)
+
+Epochs: 10
+Word vec dim: 300
+
+Optimiser: SGD (
+Parameter Group 0
+    dampening: 0
+    lr: 0.01
+    momentum: 0
+    nesterov: False
+    weight_decay: 0
+)
+
+Results:
+
+Correct predictions: 22.86%
+One star away: 30.07%
+Two stars away: 23.40%
+Three stars away: 14.14%
+Four stars away: 9.52%
+
+Weighted score: 34.89
+===========
+Model:
+network(
+  (lstm): LSTM(300, 300, num_layers=2, batch_first=True, dropout=0.1)
+  (fc1): Linear(in_features=300, out_features=300, bias=True)
+  (fc2): Linear(in_features=300, out_features=50, bias=True)
+  (fc3): Linear(in_features=50, out_features=5, bias=True)
+  (act): Tanh()
+  (sm): Softmax(dim=1)
+  (dropout): Dropout(p=0.1, inplace=False)
+)
+
+Epochs: 10
+Word vec dim: 300
+Loss func: DistLoss(dist_weight=1, err_weight=2)
+
+Optimiser: Adam (
+Parameter Group 0
+    amsgrad: False
+    betas: (0.9, 0.999)
+    eps: 1e-08
+    lr: 0.0001
+    weight_decay: 0
+)
+
+Results:
+
+Correct predictions: 43.30%
+One star away: 38.08%
+Two stars away: 12.02%
+Three stars away: 4.40%
+Four stars away: 2.20%
+
+Weighted score: 58.53
+===========
+Model:
+network(
+  (lstm): LSTM(300, 300, num_layers=2, batch_first=True, dropout=0.1)
+  (fc1): Linear(in_features=300, out_features=300, bias=True)
+  (fc2): Linear(in_features=300, out_features=50, bias=True)
+  (fc3): Linear(in_features=50, out_features=5, bias=True)
+  (act): Tanh()
+  (sm): Softmax(dim=1)
+  (dropout): Dropout(p=0.1, inplace=False)
+)
+
+Epochs: 10
+Word vec dim: 300
+Loss func: DistLoss()
+
+Optimiser: Adam (
+Parameter Group 0
+    amsgrad: False
+    betas: (0.9, 0.999)
+    eps: 1e-08
+    lr: 0.0001
+    weight_decay: 0
+)
+
+Results:
+
+Correct predictions: 33.29%
+One star away: 33.60%
+Two stars away: 17.85%
+Three stars away: 10.92%
+Four stars away: 4.34%
+
+Weighted score: 46.73
+===========
+Model:
+network(
+  (lstm): LSTM(300, 300, num_layers=2, batch_first=True, dropout=0.1)
+  (fc1): Linear(in_features=300, out_features=300, bias=True)
+  (fc2): Linear(in_features=300, out_features=50, bias=True)
+  (fc3): Linear(in_features=50, out_features=5, bias=True)
+  (act): Tanh()
+  (sm): Softmax(dim=1)
+  (dropout): Dropout(p=0.1, inplace=False)
+)
+
+Epochs: 10
+Word vec dim: 300
+Loss func: DistLoss()
+
+Optimiser: Adam (
+Parameter Group 0
+    amsgrad: False
+    betas: (0.9, 0.999)
+    eps: 1e-08
+    lr: 0.0001
+    weight_decay: 0
+)
+
+Results:
+
+Correct predictions: 20.00%
+One star away: 39.87%
+Two stars away: 20.03%
+Three stars away: 20.10%
+Four stars away: 0.00%
+
+Weighted score: 35.95
+===========
+Model:
+network(
+  (lstm): LSTM(300, 150, num_layers=2, batch_first=True, dropout=0.1)
+  (fc1): Linear(in_features=150, out_features=200, bias=True)
+  (fc2): Linear(in_features=200, out_features=50, bias=True)
+  (fc3): Linear(in_features=50, out_features=5, bias=True)
+  (act): Tanh()
+  (sm): Softmax(dim=1)
+  (dropout): Dropout(p=0.1, inplace=False)
+)
+
+Epochs: 10
+Word vec dim: 300
+Loss func: DistLoss()
+
+Optimiser: Adam (
+Parameter Group 0
+    amsgrad: False
+    betas: (0.9, 0.999)
+    eps: 1e-08
+    lr: 0.0001
+    weight_decay: 0
+)
+
+Results:
+
+Correct predictions: 42.79%
+One star away: 38.24%
+Two stars away: 12.27%
+Three stars away: 4.25%
+Four stars away: 2.44%
+
+Weighted score: 58.09
+===========
+Model:
+network(
+  (lstm): LSTM(300, 150, num_layers=2, batch_first=True, dropout=0.1)
+  (fc1): Linear(in_features=150, out_features=200, bias=True)
+  (fc2): Linear(in_features=200, out_features=50, bias=True)
+  (fc3): Linear(in_features=50, out_features=5, bias=True)
+  (act): ReLU()
+  (sm): Softmax(dim=1)
+  (dropout): Dropout(p=0.1, inplace=False)
+)
+
+Epochs: 10
+Word vec dim: 300
+Loss func: BCEPlus()[Uses sqr_dist*sqr_err + BCE loss]
+
+Optimiser: Adam (
+Parameter Group 0
+    amsgrad: False
+    betas: (0.9, 0.999)
+    eps: 1e-08
+    lr: 0.0001
+    weight_decay: 0
+)
+
+Results:
+
+Correct predictions: 19.87%
+One star away: 21.35%
+Two stars away: 20.23%
+Three stars away: 19.69%
+Four stars away: 18.85%
+
+Weighted score: 28.41
+===========
+Model:
+network(
+  (lstm): LSTM(300, 150, num_layers=2, batch_first=True, dropout=0.1)
+  (fc1): Linear(in_features=150, out_features=200, bias=True)
+  (fc2): Linear(in_features=200, out_features=50, bias=True)
+  (fc3): Linear(in_features=50, out_features=5, bias=True)
+  (act): ReLU()
+  (sm): Softmax(dim=1)
+  (dropout): Dropout(p=0.1, inplace=False)
+)
+
+Epochs: 10
+Word vec dim: 300
+Loss func: BCEPlus()[Uses sqr_dist*sqr_err + BCE loss]
+
+Optimiser: Adam (
+Parameter Group 0
+    amsgrad: False
+    betas: (0.9, 0.999)
+    eps: 1e-08
+    lr: 0.0001
+    weight_decay: 0
+)
+
+Results:
+
+Correct predictions: 43.83%
+One star away: 38.37%
+Two stars away: 11.95%
+Three stars away: 3.92%
+Four stars away: 1.92%
+
+Weighted score: 59.18
+===========
+Model:
+network(
+  (lstm): LSTM(300, 150, num_layers=2, batch_first=True, dropout=0.1)
+  (fc1): Linear(in_features=150, out_features=200, bias=True)
+  (fc2): Linear(in_features=200, out_features=50, bias=True)
+  (fc3): Linear(in_features=50, out_features=5, bias=True)
+  (act): ReLU()
+  (sm): Softmax(dim=1)
+  (dropout): Dropout(p=0.1, inplace=False)
+)
+
+Epochs: 10
+Word vec dim: 300
+Loss func: BCEPlus()[Uses dist**2 * sqr_err + BCE loss]
+
+Optimiser: Adam (
+Parameter Group 0
+    amsgrad: False
+    betas: (0.9, 0.999)
+    eps: 1e-08
+    lr: 0.0001
+    weight_decay: 0
+)
+
+Results:
+
+Correct predictions: 43.86%
+One star away: 39.86%
+Two stars away: 12.21%
+Three stars away: 2.94%
+Four stars away: 1.13%
+
+Weighted score: 59.80
+===========
+Model:
+network(
+  (lstm): LSTM(300, 150, num_layers=2, batch_first=True, dropout=0.1)
+  (fc1): Linear(in_features=150, out_features=200, bias=True)
+  (fc2): Linear(in_features=200, out_features=50, bias=True)
+  (fc3): Linear(in_features=50, out_features=5, bias=True)
+  (act): ReLU()
+  (sm): Softmax(dim=1)
+  (dropout): Dropout(p=0.1, inplace=False)
+)
+
+Epochs: 10
+Word vec dim: 300
+Loss func: BCEPlus()[Uses dist**2 * sqr_err + BCE loss]
+
+Optimiser: SGD (
+Parameter Group 0
+    dampening: 0
+    lr: 0.001
+    momentum: 0
+    nesterov: False
+    weight_decay: 0
+)
+
+Results:
+
+Correct predictions: 20.00%
+One star away: 40.00%
+Two stars away: 40.00%
+Three stars away: 0.00%
+Four stars away: 0.00%
+
+Weighted score: 36.00
+===========
+Model:
+network(
+  (lstm): LSTM(300, 150, num_layers=2, batch_first=True, dropout=0.1)
+  (fc1): Linear(in_features=150, out_features=200, bias=True)
+  (fc2): Linear(in_features=200, out_features=50, bias=True)
+  (fc3): Linear(in_features=50, out_features=5, bias=True)
+  (act): ReLU()
+  (sm): Softmax(dim=1)
+  (dropout): Dropout(p=0.1, inplace=False)
+)
+
+Epochs: 10
+Word vec dim: 300
+Loss func: BCEPlus()[Uses dist**2 * sqr_err + BCE loss]
+
+Optimiser: SGD (
+Parameter Group 0
+    dampening: 0
+    lr: 0.03
+    momentum: 0
+    nesterov: False
+    weight_decay: 0
+)
+
+Results:
+
+Correct predictions: 20.00%
+One star away: 40.00%
+Two stars away: 40.00%
+Three stars away: 0.00%
+Four stars away: 0.00%
+
+Weighted score: 36.00
+===========
