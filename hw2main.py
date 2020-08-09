@@ -94,6 +94,7 @@ def main():
     if student.trainValSplit != 1:
         net.eval()
 
+        dist = [0, 0, 0, 0, 0]
         closeness = [0 for _ in range(5)]
         with torch.no_grad():
             for batch in valLoader:
@@ -104,7 +105,8 @@ def main():
 
                 # Convert network output to integer values.
                 outputs = student.convertNetOutput(net(inputs, length)).flatten()
-
+                for output in outputs:
+                  dist[int(output.cpu().data.numpy())-1] += 1
                 for i in range(5):
                     closeness[i] += torch.sum(abs(labels - outputs) == i).item()
 
@@ -121,11 +123,11 @@ def main():
               "Weighted score: {:.2f}").format(*accuracy, score)
         print(scores)
 
-        from collections import Counter, OrderedDict
-        my_output = outputs.cpu().data.numpy()
-        dist = list(OrderedDict(Counter(my_output)).values())
-        dist = [x / len(my_output) for x in dist]
-        print(OrderedDict(Counter(my_output)))
+        numOutputs = sum(dist)
+        print(dist)
+        print(numOutputs)
+        dist = [x / numOutputs for x in dist]
+
         prediction_distribution = ("\n"
               "5 Stars: {:.2%}\n"
               "4 Stars: {:.2%}\n"
