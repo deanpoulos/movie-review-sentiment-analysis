@@ -70,3 +70,36 @@ Four stars away: 3.69%
 
 Weighted score: 54.06
 ===========
+Model:
+network(
+  (lstm): LSTM(300, 625, num_layers=2, batch_first=True)
+  (fc1): Linear(in_features=625, out_features=125, bias=True)
+  (r1): ReLU()
+  (fc2): Linear(in_features=125, out_features=25, bias=True)
+  (r2): ReLU()
+  (fc3): Linear(in_features=25, out_features=5, bias=True)
+  (sm): Softmax(dim=None)
+)
+
+Epochs: 10
+Word vec dim: 300
+
+Optimiser: Adam (
+Parameter Group 0
+    amsgrad: False
+    betas: (0.9, 0.999)
+    eps: 1e-08
+    lr: 0.001
+    weight_decay: 0
+)
+
+Results:
+
+Correct predictions: 42.01%
+One star away: 40.64%
+Two stars away: 12.51%
+Three stars away: 3.48%
+Four stars away: 1.36%
+
+Weighted score: 58.27
+===========
