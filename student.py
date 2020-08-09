@@ -22,6 +22,7 @@ import torch.nn as tnn
 import torch.optim as toptim
 from torch import round as rnd
 from torch import transpose, Tensor, device, argmax, cuda, sqrt
+import torch
 from torchtext.vocab import GloVe
 import nltk
 from nltk.corpus import stopwords
@@ -75,13 +76,11 @@ def convertLabel(datasetLabel):
     """
 
     # Use a one-hot encoding
-    newLabels = []
-    for elem in datasetLabel:
-        newLabel = [0,0,0,0,0]
-        newLabel[int(elem - 1)] = 1
-        newLabels.append(newLabel)
-
-    return Tensor(newLabels).to(device)
+    zeros = torch.zeros((*datasetLabel.shape, 5), 
+                        dtype=torch.float)          # [[0., 0., 0., 0., 0.],...]
+    ints = datasetLabel.to(int) - 1 
+    zeros[np.arange(len(ints)), ints] = 1.0         # [[0., 0., 1., 0., 0.],...]
+    return zeros.to(datasetLabel.device)
 
 def convertNetOutput(netOutput):
     """
@@ -92,54 +91,12 @@ def convertNetOutput(netOutput):
     values other than the five mentioned, convert the output here.
     """
 
-    # Take max-probability and return it
-    newOutput = []
-    for elem in netOutput:
-        newOutput.append((elem == max(elem)).nonzero() + 1)
-
-    newOutput = Tensor(newOutput).to(device)
-
-    return newOutput
+    # return most probable number of stars.
+    return netOutput.argmax(axis=1).to(torch.float) + 1.0
 
 ###########################################################################
 ################### The following determines the model ####################
 ###########################################################################
-
-class lstm_network(tnn.Module):
-    """
-    Class for creating the neural network.  The input to your network
-    will be a batch of reviews (in word vector form).  As reviews will
-    have different numbers of words in them, padding has been added to the
-    end of the reviews so we can form a batch of reviews of equal length.
-    """
-    def __init__(self):
-        super(network, self).__init__()
-        # params
-        self.vocab = 50
-        self.layers = 2
-        self.hidden = 256
-        self.dropout = 0.1
-        self.output = 5
-        # layers
-        self.lstm = tnn.LSTM(self.vocab, self.hidden, self.layers, 
-                             batch_first=True, bidirectional=True, dropout=self.dropout)
-        self.dropout = tnn.Dropout(self.dropout)
-        self.fc = tnn.Linear(self.hidden, self.output)
-        self.sigmoid = tnn.Sigmoid()
-
-    def forward(self, input, length):
-        batch_size = len(length)
-                                                 # Input: [batch_size, seq_length, n_vocab ]
-        lstm_out, h = self.lstm(input)                  # [batch_size, seq_length, n_hidden]
-        lstm_out = self.dropout(lstm_out)       
-        lstm_out = lstm_out.contiguous().view(-1, self.hidden)
-                                                        # [batch_size*seq_length, n_hidden]
-        fc_out = self.fc(lstm_out)                      # [batch_size*seq_length, n_output]
-        sigmoid_out = self.sigmoid(fc_out)              # [batch_size*seq_length, n_output] 
-        sigmoid_out = sigmoid_out.view(batch_size, -1)  # [batch_size, seq_length*n_output] 
-        sigmoid_last = sigmoid_out[:,-5:]               # [batch_size, 5]
-
-        return sigmoid_last
 
 class network(tnn.Module):
     """
@@ -171,7 +128,7 @@ class network(tnn.Module):
         data = self.fc2(data)
         data = self.r2(data)
 
-        # Propogate through dense layer and ReLU
+        # Propogate through dense layer and Softmax
         data = self.fc3(data)
         data = self.sm(data)
 
@@ -191,8 +148,8 @@ class loss(tnn.Module):
         super(loss, self).__init__()
 
     def forward(self, output, target):
-        targetStars = argmax(target) + 1
-        BCELoss = tnn.functional.binary_cross_entropy(output, target).to(device)
+#        return mse
+#        targetStars = argmax(target) + 1
 #        MSELoss = []
 #        for i in range(len(target)):
 #            ratingLoss = 0
@@ -213,8 +170,9 @@ net = network()
     the torch package, or create your own with the loss class above.
 """
 device = device('cuda:0' if cuda.is_available() else 'cpu')
-#lossFunc = tnn.BCELoss(Tensor([1,0.65,0.4,0.65,1]).to(device))
-lossFunc = loss()
+lossFunc = tnn.BCELoss(Tensor([1,0.75,0.5,0.75,1]).to(device))
+#lossFunc = tnn.BCELoss()
+#lossFunc = loss()
 
 ###########################################################################
 ################ The following determines training options ################
