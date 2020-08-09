@@ -10,7 +10,8 @@
 ## Todo
  - [x] Implement BCELoss function.
  - [ ] Research custom loss function.
- - [ ] Research RNN network.
+   -> https://pytorch.org/docs/master/notes/extending.html
+ - [x] Research RNN network.
  - [ ] Research different activations for dense layers.
  - [ ] Research different optimiser parameters.
  - [ ] Implement analysis of predicted/actual review-ratings.
