@@ -130,6 +130,7 @@ def main():
             f.write(str(net))
             f.write("\n\nEpochs: {}\n".format(student.epochs))
             f.write("Word vec dim: {}\n".format(student.wordVectors.dim))
+            f.write("Loss func: {}\n".format(student.lossFunc))
             f.write("\nOptimiser: {}\n".format(student.optimiser))
             f.write("\nResults:\n")
             f.write(scores)
