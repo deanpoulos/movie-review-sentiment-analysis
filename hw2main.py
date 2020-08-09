@@ -1,9 +1,7 @@
 #!/usr/bin/env python3
 """
 hw2main.py
-
 UNSW COMP9444 Neural Networks and Deep Learning
-
 DO NOT MODIFY THIS FILE
 """
 
@@ -122,6 +120,20 @@ def main():
               "\n"
               "Weighted score: {:.2f}").format(*accuracy, score)
         print(scores)
+
+        from collections import Counter, OrderedDict
+        my_output = outputs.cpu().data.numpy()
+        dist = list(OrderedDict(Counter(my_output)).values())
+        dist = [x / len(my_output) for x in dist]
+        print(OrderedDict(Counter(my_output)))
+        prediction_distribution = ("\n"
+              "5 Stars: {:.2%}\n"
+              "4 Stars: {:.2%}\n"
+              "3 Stars: {:.2%}\n"
+              "2 Stars: {:.2%}\n"
+              "1 Star : {:.2%}\n").format(*dist)
+            
+        print(prediction_distribution)
               
     # Add to log
     if '--nolog' not in sys.argv:
