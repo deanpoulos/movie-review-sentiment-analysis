@@ -257,19 +257,21 @@ class network(tnn.Module):
     have different numbers of words in them, padding has been added to the
     end of the reviews so we can form a batch of reviews of equal length.
     """
-    # Parameters
-    n_hidden    = 625
-    n_vocab     = wordVectors.dim # 300
-    n_stacked   = 2
-    n_output    = 5
 
     def __init__(self):
         super(network, self).__init__()
 
+        # Parameters
+        n_hidden    = 625
+        n_vocab     = wordVectors.dim # 300
+        n_stacked   = 2
+        n_output    = 5
+
+        # Layers
         self.lstm = tnn.LSTM(n_vocab, n_hidden, n_stacked, batch_first=True)
-        self.fc1 = tnn.Linear(n_hidden, n_hidden/5)
-        self.fc2 = tnn.Linear(n_hidden/5, n_hidden/25)
-        self.fc3 = tnn.Linear(n_hidden/25, n_output)
+        self.fc1 = tnn.Linear(n_hidden, 125)
+        self.fc2 = tnn.Linear(125, 25)
+        self.fc3 = tnn.Linear(25, n_output)
         self.relu = tnn.ReLU()
         self.sm = tnn.Softmax(dim=1)
 
@@ -280,16 +282,16 @@ class network(tnn.Module):
         # Use LSTM to scan over temporal input
         data, states = self.lstm(input) # [batch_size, seq_length, n_hidden]
         data = data.contiguous()
-        data = data.view(-1, n_hidden)  # [batch_size*seq_length,  n_hidden]
+        data = data.view(-1, 625)         # [batch_size*seq_length,  n_hidden]
 
         # Pass output of the LSTM through 3 dense layers (2 hidden, 1 output)
-        data = self.relu(fc1(data))       # [batch_size*seq_length, n_hidden/5]
-        data = self.relu(fc2(data))       # [batch_size*seq_length, n_hidden/25]
-        data = self.sm(fc3(data))         # [batch_size*seq_length, n_output]
+        data = self.relu(self.fc1(data))  # [batch_size*seq_length, n_hidden/5]
+        data = self.relu(self.fc2(data))  # [batch_size*seq_length, n_hidden/25]
+        data = self.sm(self.fc3(data))    # [batch_size*seq_length, n_output]
 
         # Output the final timestep of the LSTM
-        data = data.view(batch_size, -1) # [batch_size, seq_length*n_output]  
-        data = data[:,-5:]               # [batch_size, 5]
+        data = data.view(batch_size, -1)  # [batch_size, seq_length*n_output]
+        data = data[:,-5:]                # [batch_size, 5]
 
         return data
 
