@@ -354,5 +354,5 @@ lossFunc = BCEPlus()
 
 trainValSplit = 1
 batchSize = 32
-epochs = 15
+epochs = 14
 optimiser = toptim.Adam(net.parameters(), lr=0.0001)

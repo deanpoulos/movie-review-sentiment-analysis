@@ -126,7 +126,7 @@ def main():
         numOutputs = sum(dist)
         dist = [x / numOutputs for x in dist]
 
-        print("In " + str(epochs) + " epochs, rating distribution is:")
+        print("In " + str(student.epochs) + " epochs, rating distribution is:")
 
         prediction_distribution = ("\n"
               "5 Stars: {:.2%}\n"
