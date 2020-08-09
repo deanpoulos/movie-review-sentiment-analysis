@@ -178,7 +178,7 @@ lossFunc = BCEPlus()
 ################ The following determines training options ################
 ###########################################################################
 
-trainValSplit = 0.8
+trainValSplit = 1
 batchSize = 32
 epochs = 15
 optimiser = toptim.Adam(net.parameters(), lr=0.0001)
